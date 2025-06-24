@@ -3,7 +3,7 @@ name: Convert Blogger XML to MT Format
 on:
   workflow_dispatch:
     inputs:
-      input-file:
+      blogger-xml:
         description: 'Upload Blogger XML file'
         required: true
         type: file
@@ -13,29 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: Upload Blogger XML
+      uses: actions/upload-artifact@v4
+      with:
+        name: blogger-xml
+        path: ${{ github.event.inputs.blogger-xml }}
+
+    - name: Download Blogger XML
+      uses: actions/download-artifact@v4
+      with:
+        name: blogger-xml
+        path: .
+
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
 
-    - name: Upload input file
-      uses: actions/upload-artifact@v4
-      with:
-        name: blogger-xml
-        path: ${{ github.event.inputs['input-file'] }}
-
-    - name: Download input file
-      uses: actions/download-artifact@v3
-      with:
-        name: blogger-xml
-        path: ./ 
-
-    - name: Run conversion script
-      run: |
-        python3 convert.py blogger.xml export.txt
+    - name: Run convert script
+      run: python3 convert.py blogger.xml export.txt
 
     - name: Upload converted MT file
       uses: actions/upload-artifact@v4
