@@ -1,8 +1,19 @@
+import sys
 import xml.etree.ElementTree as ET
-from bs4 import BeautifulSoup
 
-INPUT_FILE = "blogger.xml"
-OUTPUT_FILE = "output.txt"
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    print("ERROR: bs4が見つかりません。GitHub Actionsのworkflowでインストールしてください。")
+    sys.exit(1)
+
+if len(sys.argv) != 3:
+    print(f"Usage: python {sys.argv[0]} input.xml output.txt")
+    sys.exit(1)
+
+INPUT_FILE = sys.argv[1]
+OUTPUT_FILE = sys.argv[2]
+
 NS = {'atom': 'http://www.w3.org/2005/Atom'}
 
 tree = ET.parse(INPUT_FILE)
@@ -22,10 +33,8 @@ for entry in root.findall('atom:entry', NS):
         raw_html = content_elem.text or ""
         soup = BeautifulSoup(raw_html, "html.parser")
 
-        # <body> 内のみ抽出
         body = soup.find('body')
         if body:
-            # テキストだけにする（HTMLタグ削除）
             body_text = body.get_text(separator='\n', strip=True)
         else:
             body_text = soup.get_text(separator='\n', strip=True)
