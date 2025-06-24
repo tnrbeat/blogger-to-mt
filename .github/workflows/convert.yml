@@ -1,4 +1,4 @@
-name: Convert Blogger XML to MovableType Format
+name: Convert Blogger to MT Format
 
 on:
   workflow_dispatch:
@@ -12,13 +12,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install --upgrade pip
-
-      - name: Rename uploaded file to blogger.xml
-        run: mv blogger.xml blogger.xml
+        run: pip install -r requirements.txt
 
       - name: Run conversion script
         run: python convert.py
