@@ -1,3 +1,4 @@
+import re
 import xml.etree.ElementTree as ET
 
 INPUT_FILE = "blogger.xml"
@@ -15,19 +16,28 @@ for entry in root.findall('atom:entry', NS):
 
     if title_elem is not None and content_elem is not None and published_elem is not None:
         title = title_elem.text or "No title"
-        content = content_elem.text or ""
+        raw_content = content_elem.text or ""
         published = published_elem.text or ""
         date = published.replace('T', ' ').split('.')[0]
+
+        # 記事本文だけを抜き出す
+        match = re.search(r"<body[^>]*>(.*?)</body>", raw_content, re.DOTALL)
+        body = match.group(1) if match else raw_content
+
+        # 無駄なHTMLタグやCSSはさらに削る（お好みで BeautifulSoup などを使ってもOK）
+        body = re.sub(r"<(script|style|head|b:[^>]+)>.*?</\1>", "", body, flags=re.DOTALL)
+        body = re.sub(r"<[^>]+>", "", body)  # 全タグ除去する場合
+        body = body.strip()
 
         mt_post = f"""AUTHOR: あなたの名前
 TITLE: {title}
 STATUS: Publish
 ALLOW COMMENTS: 1
-CONVERT BREAKS: 0
+CONVERT BREAKS: 1
 DATE: {date}
 -----
 BODY:
-{content}
+{body}
 --------
 """
         mt_posts.append(mt_post)
