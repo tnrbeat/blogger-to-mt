@@ -1,23 +1,45 @@
 import xml.etree.ElementTree as ET
+from datetime import datetime
 
-def convert_blogger_to_mt(input_file, output_file):
-    tree = ET.parse(input_file)
-    root = tree.getroot()
+# BloggerバックアップXMLファイル
+INPUT_FILE = "blogger_backup.xml"
+OUTPUT_FILE = "output_mt.txt"
 
-    ns = {'atom': 'http://www.w3.org/2005/Atom'}
+# 名前空間
+NS = {'atom': 'http://www.w3.org/2005/Atom'}
 
-    with open(output_file, 'w', encoding='utf-8') as f:
-        for entry in root.findall('atom:entry', ns):
-            kind = entry.find("atom:category[@scheme='http://schemas.google.com/g/2005#kind']", ns)
-            if kind is not None and kind.attrib.get('term') == 'http://schemas.google.com/blogger/2008/kind#post':
-                title = entry.find('atom:title', ns).text or ''
-                content = entry.find('atom:content', ns).text or ''
-                published = entry.find('atom:published', ns).text or ''
+tree = ET.parse(INPUT_FILE)
+root = tree.getroot()
 
-                f.write(f"TITLE: {title}\n")
-                f.write(f"DATE: {published}\n")
-                f.write("-----\n")
-                f.write(content + "\n\n")
+mt_posts = []
 
-if __name__ == '__main__':
-    convert_blogger_to_mt('blogger.xml', 'output.txt')
+# entry 要素を取得
+for entry in root.findall('atom:entry', NS):
+    # 投稿記事のみ取得（postKindが空でなくtitleがあるもの）
+    title_elem = entry.find('atom:title', NS)
+    content_elem = entry.find('atom:content', NS)
+    published_elem = entry.find('atom:published', NS)
+
+    if title_elem is not None and content_elem is not None and published_elem is not None:
+        title = title_elem.text or "No title"
+        content = content_elem.text or ""
+        published = published_elem.text or ""
+
+        # 日付整形
+        date = published.replace('T', ' ').split('.')[0]
+
+        mt_post = f"""AUTHOR: あなたの名前
+TITLE: {title}
+DATE: {date}
+-----
+BODY:
+{content}
+--------
+"""
+        mt_posts.append(mt_post)
+
+# MTファイル出力
+with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    f.write("\n".join(mt_posts))
+
+print(f"✅ {OUTPUT_FILE} にMT形式で出力完了！")
