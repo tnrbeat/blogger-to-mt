@@ -1,31 +1,32 @@
-name: Convert Blogger XML to MT Format
+name: Convert Blogger XML to MT
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '**.xml'
+      - 'convert.py'
+      - 'requirements.txt'
 
 jobs:
   convert:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # 依存ライブラリがあればここに記述。なければスキップ可
+        run: pip install -r requirements.txt
 
       - name: Run conversion script
         run: python convert.py blogger.xml output.txt
 
-      - name: Upload converted MT file
-        uses: actions/upload-artifact@v4
+      - name: Upload result
+        uses: actions/upload-artifact@v3
         with:
-          name: mt-converted-file
+          name: MT-output
           path: output.txt
