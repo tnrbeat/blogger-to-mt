@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 INPUT_FILE = "blogger.xml"
-OUTPUT_FILE = "output.txt"  # <- output.txt に統一
+OUTPUT_FILE = "output.txt"
 
 NS = {'atom': 'http://www.w3.org/2005/Atom'}
 tree = ET.parse(INPUT_FILE)
@@ -21,6 +21,9 @@ for entry in root.findall('atom:entry', NS):
 
         mt_post = f"""AUTHOR: あなたの名前
 TITLE: {title}
+STATUS: Publish
+ALLOW COMMENTS: 1
+CONVERT BREAKS: 0
 DATE: {date}
 -----
 BODY:
