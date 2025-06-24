@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup
 import re
 
 def convert_blogger_to_mt(input_file, output_file):
@@ -9,34 +9,24 @@ def convert_blogger_to_mt(input_file, output_file):
 
     with open(output_file, 'w', encoding='utf-8') as f:
         for entry in root.findall('atom:entry', ns):
+            # 投稿タイプが「記事（post）」以外はスキップ（テンプレや設定除外）
+            category = entry.find("atom:category", ns)
+            if category is None or "kind#post" not in category.attrib.get("term", ""):
+                continue
+
             title = entry.find('atom:title', ns).text or ''
             published = entry.find('atom:published', ns).text or ''
-
-            summary_elem = entry.find('atom:summary', ns)
             content_elem = entry.find('atom:content', ns)
+            content = content_elem.text if content_elem is not None else ''
 
-            if summary_elem is not None and summary_elem.text:
-                raw_content = summary_elem.text
-            elif content_elem is not None and content_elem.text:
-                raw_content = content_elem.text
-            else:
-                raw_content = ''
+            # 本文HTMLを整形（不要タグ除去）
+            soup = BeautifulSoup(content, 'html.parser')
+            for tag in soup.find_all(re.compile(r"^b:")):
+                tag.decompose()
 
-            soup = BeautifulSoup(raw_content, 'html.parser')
+            content_html = str(soup).strip()
 
-            # Bloggerタグ除去
-            for b_tag in soup.find_all(re.compile(r"^b:")):
-                b_tag.decompose()
-            for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
-                comment.extract()
-
-            # できれば本文部分だけ抽出（要調整）
-            content_div = soup.find('div', class_='post-body') or soup.find('div', class_='content')
-            if content_div:
-                content_html = ''.join(str(x) for x in content_div.contents).strip()
-            else:
-                content_html = str(soup).strip()
-
+            # 書き出し（Movable Type形式）
             f.write(f'''TITLE: {title}
 DATE: {published}
 -----
