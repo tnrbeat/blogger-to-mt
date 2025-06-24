@@ -17,21 +17,22 @@ def convert_blogger_to_mt(input_file, output_file):
             published = entry.find('atom:published', ns).text or ''
             raw_content = content_elem.text or ''
 
-            # HTML解析
             soup = BeautifulSoup(raw_content, 'html.parser')
 
-            # Bloggerの独自タグ <b:～> を除去
+            # Blogger独自タグ除去
             for b_tag in soup.find_all(re.compile(r"^b:")):
                 b_tag.decompose()
-
-            # コメントも除去したい場合
             for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
                 comment.extract()
 
-            # 本文だけをHTML形式で取得（bodyタグがあれば中身だけ）
-            content_html = ''.join(str(x) for x in soup.body.contents) if soup.body else str(soup)
+            # ここで本文のHTML部分だけを抽出
+            content_div = soup.find('div', class_='content')
+            if content_div:
+                content_html = ''.join(str(x) for x in content_div.contents).strip()
+            else:
+                # fallbackで全文出力
+                content_html = str(soup).strip()
 
-            # Movable Type形式で書き込み
             f.write(f'''TITLE: {title}
 DATE: {published}
 -----
