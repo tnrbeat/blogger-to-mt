@@ -1,7 +1,7 @@
 name: Convert Blogger XML to MT Format
 
 on:
-  workflow_dispatch:   # 手動実行
+  workflow_dispatch:
 
 jobs:
   convert:
@@ -16,12 +16,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run conversion script
+      - name: Install dependencies
         run: |
-          python convert.py blogger.xml output.txt
+          python -m pip install --upgrade pip
+          # 依存ライブラリがあればここに記述。なければスキップ可
+
+      - name: Run conversion script
+        run: python convert.py blogger.xml output.txt
 
       - name: Upload converted MT file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mt-converted-file
           path: output.txt
