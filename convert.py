@@ -47,12 +47,13 @@ CONVERT BREAKS: 0
 DATE: {date}
 -----
 BODY:
+
 {body_text}
 --------
 """
         mt_posts.append(mt_post)
 
-with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+with open(OUTPUT_FILE, "w", encoding="utf-8", newline="\n") as f:
     f.write("\n".join(mt_posts))
 
 print(f"✅ {OUTPUT_FILE} にMT形式で出力完了！")
