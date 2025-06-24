@@ -1,4 +1,4 @@
-name: Convert Blogger to MT
+name: Convert Blogger XML to MT Format
 
 on:
   push:
@@ -20,14 +20,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run converter
+      - name: Run convert.py
         run: python convert.py
 
-      - name: Upload result
+      - name: Upload result file
         uses: actions/upload-artifact@v4
         with:
-          name: export-txt
+          name: export
           path: export.txt
