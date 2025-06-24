@@ -18,7 +18,7 @@ jobs:
         run: pip install --upgrade pip
 
       - name: Rename uploaded file to blogger.xml
-        run: mv blog-06-23-2025.xml blogger.xml
+        run: mv blogger.xml blogger.xml
 
       - name: Run conversion script
         run: python convert.py
