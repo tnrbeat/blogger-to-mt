@@ -1,0 +1,22 @@
+name: Convert Blogger XML to MT Format
+
+on:
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Run conversion
+      run: |
+        python convert.py
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mt-export
+        path: export.txt
