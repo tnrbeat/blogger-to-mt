@@ -1,10 +1,10 @@
-import re
 import xml.etree.ElementTree as ET
+from bs4 import BeautifulSoup
 
 INPUT_FILE = "blogger.xml"
 OUTPUT_FILE = "output.txt"
-
 NS = {'atom': 'http://www.w3.org/2005/Atom'}
+
 tree = ET.parse(INPUT_FILE)
 root = tree.getroot()
 
@@ -16,28 +16,29 @@ for entry in root.findall('atom:entry', NS):
 
     if title_elem is not None and content_elem is not None and published_elem is not None:
         title = title_elem.text or "No title"
-        raw_content = content_elem.text or ""
         published = published_elem.text or ""
         date = published.replace('T', ' ').split('.')[0]
 
-        # 記事本文だけを抜き出す
-        match = re.search(r"<body[^>]*>(.*?)</body>", raw_content, re.DOTALL)
-        body = match.group(1) if match else raw_content
+        raw_html = content_elem.text or ""
+        soup = BeautifulSoup(raw_html, "html.parser")
 
-        # 無駄なHTMLタグやCSSはさらに削る（お好みで BeautifulSoup などを使ってもOK）
-        body = re.sub(r"<(script|style|head|b:[^>]+)>.*?</\1>", "", body, flags=re.DOTALL)
-        body = re.sub(r"<[^>]+>", "", body)  # 全タグ除去する場合
-        body = body.strip()
+        # <body> 内のみ抽出
+        body = soup.find('body')
+        if body:
+            # テキストだけにする（HTMLタグ削除）
+            body_text = body.get_text(separator='\n', strip=True)
+        else:
+            body_text = soup.get_text(separator='\n', strip=True)
 
         mt_post = f"""AUTHOR: あなたの名前
 TITLE: {title}
 STATUS: Publish
 ALLOW COMMENTS: 1
-CONVERT BREAKS: 1
+CONVERT BREAKS: 0
 DATE: {date}
 -----
 BODY:
-{body}
+{body_text}
 --------
 """
         mt_posts.append(mt_post)
