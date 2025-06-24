@@ -1,18 +1,7 @@
 name: Convert Blogger XML to MT Format
 
 on:
-    workflow_dispatch:    # ← これを追加
-  push:
-    paths:
-      - 'blogger.xml'
-      - 'convert.py'
-      - '.github/workflows/convert.yml'
-
-jobs:
-  convert:
-    runs-on: ubuntu-latest
-    steps:
-
+  workflow_dispatch:  # 手動実行用トリガー
   push:
     paths:
       - 'blogger.xml'
@@ -24,20 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.x'
 
-      - name: Run convert.py
-        run: python convert.py
+      - name: Run conversion script
+        run: python3 convert.py blogger.xml export.txt
 
-      - name: Upload result file
-        uses: actions/upload-artifact@v4
+      - name: Upload converted file as artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: export
+          name: converted-export
           path: export.txt
-
