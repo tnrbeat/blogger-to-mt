@@ -1,4 +1,4 @@
-name: Convert Blogger XML to MT Format
+name: Convert Blogger XML to MovableType Format
 
 on:
   workflow_dispatch:
@@ -7,17 +7,24 @@ jobs:
   convert:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: pip install beautifulsoup4
-    - name: Run conversion
-      run: python convert.py
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: mt-export
-        path: export.txt
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install --upgrade pip
+
+      - name: Rename uploaded file to blogger.xml
+        run: mv blog-06-23-2025.xml blogger.xml
+
+      - name: Run conversion script
+        run: python convert.py
+
+      - name: Upload converted file
+        uses: actions/upload-artifact@v4
+        with:
+          name: export
+          path: export.txt
