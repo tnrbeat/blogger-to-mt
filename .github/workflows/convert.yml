@@ -1,13 +1,19 @@
-name: Convert Blogger to MT Format
+name: Convert Blogger to MT
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - 'blogger.xml'
+      - 'convert.py'
+      - '.github/workflows/convert.yml'
 
 jobs:
   convert:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -17,11 +23,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run conversion script
+      - name: Run converter
         run: python convert.py
 
-      - name: Upload converted file
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: export
+          name: export-txt
           path: export.txt
