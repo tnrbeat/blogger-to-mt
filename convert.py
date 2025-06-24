@@ -1,25 +1,18 @@
 import xml.etree.ElementTree as ET
 
-# 入力ファイルと出力ファイル
 INPUT_FILE = "blogger.xml"
-OUTPUT_FILE = "output_mt.txt"
+OUTPUT_FILE = "output.txt"  # <- output.txt に統一
 
-# 名前空間
 NS = {'atom': 'http://www.w3.org/2005/Atom'}
-
-# XML読み込み
 tree = ET.parse(INPUT_FILE)
 root = tree.getroot()
 
 mt_posts = []
-
-# entry 要素のみループ
 for entry in root.findall('atom:entry', NS):
     title_elem = entry.find('atom:title', NS)
     content_elem = entry.find('atom:content', NS)
     published_elem = entry.find('atom:published', NS)
 
-    # 投稿記事のみ取得
     if title_elem is not None and content_elem is not None and published_elem is not None:
         title = title_elem.text or "No title"
         content = content_elem.text or ""
@@ -36,7 +29,6 @@ BODY:
 """
         mt_posts.append(mt_post)
 
-# MT形式ファイル出力
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write("\n".join(mt_posts))
 
