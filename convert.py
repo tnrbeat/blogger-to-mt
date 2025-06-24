@@ -1,5 +1,6 @@
 from xml.etree import ElementTree as ET
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
+import re
 
 def convert_blogger_to_mt(input_file, output_file):
     tree = ET.parse(input_file)
@@ -16,14 +17,21 @@ def convert_blogger_to_mt(input_file, output_file):
             published = entry.find('atom:published', ns).text or ''
             raw_content = content_elem.text or ''
 
-            # HTMLパースして本文だけ抽出
+            # HTML解析
             soup = BeautifulSoup(raw_content, 'html.parser')
 
-            # 本文だけテキスト化（HTMLタグはそのまま残したい場合は .prettify() や .decode_contents()）
-            # はてなブログはHTMLもOKなのでタグ付きで中身だけ抽出例：
-            content_html = ''.join(str(x) for x in soup.body.contents) if soup.body else raw_content
+            # Bloggerの独自タグ <b:～> を除去
+            for b_tag in soup.find_all(re.compile(r"^b:")):
+                b_tag.decompose()
 
-            # Movable Type形式で出力
+            # コメントも除去したい場合
+            for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+                comment.extract()
+
+            # 本文だけをHTML形式で取得（bodyタグがあれば中身だけ）
+            content_html = ''.join(str(x) for x in soup.body.contents) if soup.body else str(soup)
+
+            # Movable Type形式で書き込み
             f.write(f'''TITLE: {title}
 DATE: {published}
 -----
