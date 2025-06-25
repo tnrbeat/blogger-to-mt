@@ -1,20 +1,37 @@
-import xml.etree.ElementTree as ET
+import re
 import csv
 
-xml_file = 'blogger.xml'
-tree = ET.parse(xml_file)
-root = tree.getroot()
+filename = 'hatena_export.txt'
+pattern_title = re.compile(r'<title>(.*?)</title>')
+pattern_link = re.compile(r'<link>(.*?)</link>')
 
-ns = {'atom': 'http://www.w3.org/2005/Atom'}
-with open('blogger_urls.csv', 'w', newline='', encoding='utf-8') as f:
+titles = []
+links = []
+
+with open(filename, encoding='utf-8') as f:
+    lines = f.readlines()
+
+for i, line in enumerate(lines):
+    if '<item>' in line:
+        # 次の数行でタイトルとリンクを探す
+        for j in range(i, i+10):
+            if j >= len(lines):
+                break
+            title_match = pattern_title.search(lines[j])
+            link_match = pattern_link.search(lines[j])
+            if title_match:
+                title = title_match.group(1)
+            if link_match:
+                link = link_match.group(1)
+                titles.append(title)
+                links.append(link)
+                break
+
+# CSVに書き出す
+with open('hatena_urls.csv', 'w', newline='', encoding='utf-8') as f:
     writer = csv.writer(f)
-    writer.writerow(['title', 'old_url'])  # ヘッダー
-    for entry in root.findall('atom:entry', ns):
-        title_elem = entry.find('atom:title', ns)
-        link_elem = entry.find('atom:link[@rel="alternate"]', ns)
-        if title_elem is not None and link_elem is not None:
-            title = title_elem.text
-            old_url = link_elem.attrib['href']
-            writer.writerow([title, old_url])
+    writer.writerow(['title', 'new_url'])
+    for t, l in zip(titles, links):
+        writer.writerow([t, l])
 
-print('✅ blogger_urls.csv を生成しました')
+print('hatena_urls.csv を作成しました')
