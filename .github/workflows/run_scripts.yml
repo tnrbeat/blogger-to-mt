@@ -1,0 +1,34 @@
+name: Generate Hatena URLs CSV
+
+on:
+  push:
+    paths:
+      - 'hatena_export.txt'
+      - 'your_script_name.py'   # スクリプトのファイル名に合わせてください
+      - '.github/workflows/generate_hatena_urls.yml'
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run URL extraction script
+        run: python your_script_name.py
+
+      - name: List files for debug
+        run: ls -la
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hatena_urls_csv
+          path: hatena_urls.csv
