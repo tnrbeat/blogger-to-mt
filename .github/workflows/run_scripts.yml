@@ -1,0 +1,29 @@
+name: Generate CSV
+
+on:
+  push:
+    paths:
+      - 'blogger.xml'
+      - 'generate_csv.py'
+      - '.github/workflows/run_scripts.yml'
+  workflow_dispatch: # 手動でも実行可能にする
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run CSV generation
+        run: python generate_csv.py
+
+      - name: Upload CSV as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: blogger_urls_csv
+          path: blogger_urls.csv
