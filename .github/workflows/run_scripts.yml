@@ -4,8 +4,8 @@ on:
   push:
     paths:
       - 'hatena_export.txt'
-      - 'your_script_name.py'   # スクリプトのファイル名に合わせてください
-      - '.github/workflows/generate_hatena_urls.yml'
+      - 'generate_csv.py'   # スクリプトのファイル名に合わせてください
+      - '.github/workflows/run_scripts.yml'
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
           python-version: '3.x'
 
       - name: Run URL extraction script
-        run: python your_script_name.py
+        run: python generate_csv.py
 
       - name: List files for debug
         run: ls -la
